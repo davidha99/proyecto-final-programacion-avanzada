@@ -8,8 +8,9 @@ typedef struct posiciones {
     int pos_fin;
 } posicion;
 
-posicion secuencias[1001];  // 1001 por que las secuencias se van a guardar del 1 al 1000
-int cont_secuencias = 1;    // Empieza en la posición 1 porque la posición 0 no la vamos a usar
+posicion secuencias[1001];                                        // 1001 por que las secuencias se van a guardar del 1 al 1000
+int pos_next_secuencia = 1;                                       // Empieza en la posición 1 porque la posición 0 no la vamos a usar
+int num_secuencias_mapeadas = 0, num_secuencias_no_mapeadas = 0;  // Contador de secuencias mapeadas y no mapeadas
 char *referencia;
 long lsize_referencia;
 
@@ -63,8 +64,9 @@ void algoritmo_substring() {
             if (j == secuencia_len) {
                 pos.pos_ini = i;
                 pos.pos_fin = k - 1;
-                secuencias[cont_secuencias] = pos;
+                secuencias[pos_next_secuencia] = pos;
                 encontrado = 1;
+                num_secuencias_mapeadas++;
             }
 
             if (encontrado == 1)
@@ -74,10 +76,11 @@ void algoritmo_substring() {
         if (encontrado == 0) {
             pos.pos_ini = -1;
             pos.pos_fin = -1;
-            secuencias[cont_secuencias] = pos;
+            secuencias[pos_next_secuencia] = pos;
+            num_secuencias_no_mapeadas++;
         }
         /*Aumentamos contador para guardar la siguiente estructura de tipo "posición"*/
-        cont_secuencias++;
+        pos_next_secuencia++;
 
         /*Reseteamos variable encontrado para la próxima secuencia*/
         encontrado = 0;
@@ -101,6 +104,8 @@ int main() {
     for (int i = 1; i < 1001; i++) {
         printf("Sec %d: Posición inicial: %d, Posición final: %d\n", i, secuencias[i].pos_ini, secuencias[i].pos_fin);
     }
+
+    printf("\n%d secuencias mapeadas\n%d secuencias no mapeadas\n", num_secuencias_mapeadas, num_secuencias_no_mapeadas);
 
     // Thread 1: 1-100
     // for (int i = 1; i <= 100; i++) {
