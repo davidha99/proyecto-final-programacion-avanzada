@@ -10,7 +10,7 @@
 #endif
 
 #define NTHREADS 10
-// pthread_mutex_t lock;
+pthread_mutex_t lock;
 
 /*Estructura para guardar en qué posición se encontró la secuencia en la referencia*/
 typedef struct posiciones {
@@ -24,8 +24,8 @@ typedef struct rangos {
     int lim_sup;
 } rango;
 
-posicion secuencias[1001];                                        // 1001 por que las secuencias se van a guardar del 1 al 1000
-int pos_next_secuencia = 1;                                       // Empieza en la posición 1 porque la posición 0 no la vamos a usar
+posicion posicion_secuencias[1001];  // 1001 por que las secuencias se van a guardar del 1 al 1000
+// int pos_next_secuencia = 1;                                       // Empieza en la posición 1 porque la posición 0 no la vamos a usar
 int num_secuencias_mapeadas = 0, num_secuencias_no_mapeadas = 0;  // Contador de secuencias mapeadas y no mapeadas
 char *referencia;
 long lsize_referencia;
@@ -71,6 +71,7 @@ void *algoritmo_substring(void *x) {
     /*Variables para el algoritmo de encontrar substring*/
     int i, j, k, encontrado = 0;
     posicion pos;
+    int pos_next_secuencia = limite.lim_inf;
 
     /*Buscar si el rango de secuencias que le corresponde al thread están en la referencia*/
     while (secuencia_len >= 0) {
@@ -90,8 +91,8 @@ void *algoritmo_substring(void *x) {
                 }
                 if (j == secuencia_len) {
                     pos.pos_ini = i;
-                    pos.pos_fin = k - 1;
-                    secuencias[pos_next_secuencia] = pos;
+                    pos.pos_fin = k;
+                    posicion_secuencias[pos_next_secuencia] = pos;
                     encontrado = 1;
                     num_secuencias_mapeadas++;
                 }
@@ -103,7 +104,7 @@ void *algoritmo_substring(void *x) {
             if (encontrado == 0) {
                 pos.pos_ini = -1;
                 pos.pos_fin = -1;
-                secuencias[pos_next_secuencia] = pos;
+                posicion_secuencias[pos_next_secuencia] = pos;
                 num_secuencias_no_mapeadas++;
             }
             /*Aumentamos contador para guardar la siguiente estructura de tipo "posición"*/
@@ -118,62 +119,53 @@ void *algoritmo_substring(void *x) {
     }
     fclose(archivo_secuencia);
     // pthread_mutex_unlock(&lock);
+    free(secuencia);
     return NULL;
 }
 
 //Funcion para ordenar los limites de las posiciones iniciales por el metodo burbuja
-void ordena_estructura_bsort(){
-    int i,j;
+void ordena_estructura_bsort() {
+    int i, j;
     posicion temp;
-    int tama=1001;
+    int tama = 1001;
 
-    for (i=1; i<=tama; i++){
-        for (j=i+1; j<=tama; j++){
-
-            if(secuencias[i].pos_ini > secuencias[j].pos_ini)
-            {
-                temp=secuencias[i];
-                secuencias[i]=secuencias[j];
-                secuencias[j]=temp;
-
+    for (i = 1; i <= tama; i++) {
+        for (j = i + 1; j <= tama; j++) {
+            if (posicion_secuencias[i].pos_ini > posicion_secuencias[j].pos_ini) {
+                temp = posicion_secuencias[i];
+                posicion_secuencias[i] = posicion_secuencias[j];
+                posicion_secuencias[j] = temp;
             }
         }
-
     }
-
-
 }
 
 //funcion que calcula el porcentaje de la similitud entre las cadenas y la referencia
-float calcular_porcentaje(){
-
+float calcular_porcentaje() {
     ordena_estructura_bsort();
 
-    int tama=1001;
-    long acumulado_caracteres=0;
+    int tama = 1001;
+    long acumulado_caracteres = 0;
 
     //para que no haya traslapes modificaremos algunos rangos
-    for(int i=tama-1; i>=1 && secuencias[i].pos_fin != -1 ;i--){
-        if(secuencias[i].pos_ini < secuencias[i-1].pos_fin)
-        {
-            secuencias[i].pos_ini = secuencias[i-1].pos_fin;
+    for (int i = tama - 1; i >= 1 && posicion_secuencias[i].pos_fin != -1; i--) {
+        if (posicion_secuencias[i].pos_ini < posicion_secuencias[i - 1].pos_fin) {
+            posicion_secuencias[i].pos_ini = posicion_secuencias[i - 1].pos_fin;
         }
-        
     }
 
-    for (int j=tama-1; j>=1 && secuencias[j].pos_fin != -1 ;j--){
-        acumulado_caracteres = acumulado_caracteres + (secuencias[j].pos_fin - secuencias[j].pos_ini);
+    for (int j = tama - 1; j >= 1 && posicion_secuencias[j].pos_fin != -1; j--) {
+        acumulado_caracteres = acumulado_caracteres + (posicion_secuencias[j].pos_fin - posicion_secuencias[j].pos_ini);
     }
-    
-    return ( (acumulado_caracteres * 100 ) / lsize_referencia );
 
+    return ((acumulado_caracteres * 100) / lsize_referencia);
 }
 
 int main() {
     posicion posicion_dummy = {-1, -1};
     /*posicion_dummy es porque vamos a guardar las secuencias de la posición 1 a la 1000, ya que
     son 1000 secuencias*/
-    secuencias[0] = posicion_dummy;
+    posicion_secuencias[0] = posicion_dummy;
 
     obtener_string_referencia();
 
@@ -253,10 +245,10 @@ int main() {
     /* TERMINA PARTE DE THREADS */
 
     for (int i = 1; i < 1001; i++) {
-        printf("Sec %d: Posición inicial: %d, Posición final: %d\n", i, secuencias[i].pos_ini, secuencias[i].pos_fin);
+        printf("Sec %d: Posición inicial: %d, Posición final: %d\n", i, posicion_secuencias[i].pos_ini, posicion_secuencias[i].pos_fin);
     }
-    
-    printf("El porcentaje de igualdad ante la cadena de referencia es del: %.5f porciento\n", calcular_porcentaje());
+
+    printf("\n\nEl porcentaje de igualdad ante la cadena de referencia es del: %.5f%%", calcular_porcentaje());
     printf("\n%d secuencias mapeadas\n%d secuencias no mapeadas\n", num_secuencias_mapeadas, num_secuencias_no_mapeadas);
 
     // Thread 1: 1-100
