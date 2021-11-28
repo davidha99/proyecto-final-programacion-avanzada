@@ -90,8 +90,8 @@ void *algoritmo_substring(void *x) {
                     k++;
                 }
                 if (j == secuencia_len) {
-                    pos.pos_ini = i;
-                    pos.pos_fin = k;
+                    pos.pos_ini = i + 1;
+                    pos.pos_fin = k + 1;
                     posicion_secuencias[pos_next_secuencia] = pos;
                     encontrado = 1;
                     num_secuencias_mapeadas++;
