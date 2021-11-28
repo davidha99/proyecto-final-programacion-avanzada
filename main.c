@@ -121,6 +121,54 @@ void *algoritmo_substring(void *x) {
     return NULL;
 }
 
+//Funcion para ordenar los limites de las posiciones iniciales por el metodo burbuja
+void ordena_estructura_bsort(){
+    int i,j;
+    posicion temp;
+    int tama=1001;
+
+    for (i=1; i<=tama; i++){
+        for (j=i+1; j<=tama; j++){
+
+            if(secuencias[i].pos_ini > secuencias[j].pos_ini)
+            {
+                temp=secuencias[i];
+                secuencias[i]=secuencias[j];
+                secuencias[j]=temp;
+
+            }
+        }
+
+    }
+
+
+}
+
+//funcion que calcula el porcentaje de la similitud entre las cadenas y la referencia
+float calcular_porcentaje(){
+
+    ordena_estructura_bsort();
+
+    int tama=1001;
+    long acumulado_caracteres=0;
+
+    //para que no haya traslapes modificaremos algunos rangos
+    for(int i=tama-1; i>=1 && secuencias[i].pos_fin != -1 ;i--){
+        if(secuencias[i].pos_ini < secuencias[i-1].pos_fin)
+        {
+            secuencias[i].pos_ini = secuencias[i-1].pos_fin;
+        }
+        
+    }
+
+    for (int j=tama-1; j>=1 && secuencias[j].pos_fin != -1 ;j--){
+        acumulado_caracteres = acumulado_caracteres + (secuencias[j].pos_fin - secuencias[j].pos_ini);
+    }
+    
+    return ( (acumulado_caracteres * 100 ) / lsize_referencia );
+
+}
+
 int main() {
     posicion posicion_dummy = {-1, -1};
     /*posicion_dummy es porque vamos a guardar las secuencias de la posición 1 a la 1000, ya que
@@ -207,7 +255,8 @@ int main() {
     for (int i = 1; i < 1001; i++) {
         printf("Sec %d: Posición inicial: %d, Posición final: %d\n", i, secuencias[i].pos_ini, secuencias[i].pos_fin);
     }
-
+    
+    printf("El porcentaje de igualdad ante la cadena de referencia es del: %.5f porciento\n", calcular_porcentaje());
     printf("\n%d secuencias mapeadas\n%d secuencias no mapeadas\n", num_secuencias_mapeadas, num_secuencias_no_mapeadas);
 
     // Thread 1: 1-100
