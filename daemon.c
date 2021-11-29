@@ -1,18 +1,17 @@
+#include <ctype.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <syslog.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <ctype.h>
-#include <pthread.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <syslog.h>
+#include <unistd.h>
 
-static void daemonize()
-{
+static void daemonize() {
     pid_t pid;
 
     /* Fork off the parent process */
@@ -51,18 +50,17 @@ static void daemonize()
 
     /* Change the working directory to the root directory */
     /* or another appropriated directory */
-    chdir("/Users/jorgemiguelsotorodriguez/progrAva");
-
+    // chdir("/Users/jorgemiguelsotorodriguez/progrAva");
+    chdir("/Users/davidhdz/Documents/repos/proyecto-final-programacion-avanzada");
 
     /* Close all open file descriptors */
     int x;
-    for (x = sysconf(_SC_OPEN_MAX); x>=0; x--)
-    {
-        close (x);
+    for (x = sysconf(_SC_OPEN_MAX); x >= 0; x--) {
+        close(x);
     }
 
     /* Open the log file */
-    openlog ("firstdaemon", LOG_PID, LOG_DAEMON);
+    openlog("firstdaemon", LOG_PID, LOG_DAEMON);
 }
 
 #define NTHREADS 10
@@ -218,24 +216,21 @@ float calcular_porcentaje() {
     return ((acumulado_caracteres * 100) / lsize_referencia);
 }
 
-int main()
-{
+int main() {
     printf("Starting daemonize\n");
     daemonize();
-    FILE *fp= NULL;
-    fp = fopen ("Log.txt", "w+");
-    if (fp != NULL){
-        while (1)
-        {
-            int s , new_socket;
-            struct sockaddr_in server , client;
+    FILE *fp = NULL;
+    fp = fopen("Log.txt", "w+");
+    if (fp != NULL) {
+        while (1) {
+            int s, new_socket;
+            struct sockaddr_in server, client;
             int c;
             char *message;
 
             //Create a socket
             // Type stream tcp
-            if((s = socket(AF_INET , SOCK_STREAM , 0 )) == -1)
-            {
+            if ((s = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
                 printf("Error creating socket");
             }
 
@@ -243,28 +238,26 @@ int main()
             //Prepare the sockaddr_in structure
             server.sin_family = AF_INET;
             server.sin_addr.s_addr = INADDR_ANY;
-            server.sin_port = htons( 8888 );
+            server.sin_port = htons(8888);
             //Bind
-            if( bind(s ,(struct sockaddr *)&server , sizeof(server)) == -1)
-            {
+            if (bind(s, (struct sockaddr *)&server, sizeof(server)) == -1) {
                 printf("Bind error\n");
                 exit(EXIT_FAILURE);
             }
             puts("Bound");
-            listen(s , 3);
+            listen(s, 3);
             puts("Waiting for connections...");
             c = sizeof(struct sockaddr_in);
             //---------------
-            int iOpc = 999 ,recv_size;
+            int iOpc = 999, recv_size;
             int flagRef = 0, flagSeq = 0;
             char client_reply[2000];
             FILE *fileRef;
             FILE *fileSeq;
             //---------------
 
-            while( (new_socket = accept(s , (struct sockaddr *)&client, &c)) !=
-                  -1 )
-            {
+            while ((new_socket = accept(s, (struct sockaddr *)&client, &c)) !=
+                   -1) {
                 puts("Connection accepted \n");
                 do {
                     message = "Opciones \n (1) Upload_reference\n (2) Upload_sequence \n (3) Ejecutar";
@@ -298,27 +291,27 @@ int main()
                                     printf("%s \n", refFileName);
                                 }
 
-                                fileRef = fopen(refFileName,"rb");
-                                if(fileRef != NULL){
-                                    message = "Archivo Guardado. (1)";
+                                fileRef = fopen(refFileName, "rb");
+                                if (fileRef != NULL) {
+                                    message = "Archivo Guardado. (1)\nPresione 1 para continuar ";
                                     fclose(fileRef);
                                     flagRef = 1;
                                     send(new_socket, message, strlen(message), 0);
                                     if ((recv_size = recv(new_socket, client_reply, 2000, 0)) == -1) {
                                         puts("recv failed");
-                                    }else{
-                                        memset(client_reply,0,sizeof(client_reply));
+                                    } else {
+                                        memset(client_reply, 0, sizeof(client_reply));
                                     }
-                                }else{
-                                    message = "El archivo no existe. (1)";
+                                } else {
+                                    message = "El archivo no existe. (1)\nPresione 1 para continuar ";
                                     send(new_socket, message, strlen(message), 0);
                                     if ((recv_size = recv(new_socket, client_reply, 2000, 0)) == -1) {
                                         puts("recv failed");
                                     }
                                 }
-                            }else{
+                            } else {
                                 //Si ya hay un archivo guardado
-                                message = "Ya tienes un archivo de referencia guardado. (1)";
+                                message = "Ya tienes un archivo de referencia guardado. (1)\nPresione 1 para continuar ";
                                 send(new_socket, message, strlen(message), 0);
                                 if ((recv_size = recv(new_socket, client_reply, 2000, 0)) == -1) {
                                     puts("recv failed");
@@ -340,47 +333,45 @@ int main()
                                     printf("%s \n", seqFileName);
                                 }
 
-                                fileSeq = fopen(seqFileName,"rb");
-                                if(fileSeq != NULL){
-                                    message = "Archivo Guardado. (1)";
+                                fileSeq = fopen(seqFileName, "rb");
+                                if (fileSeq != NULL) {
+                                    message = "Archivo Guardado. (1)\nPresione 1 para continuar ";
                                     fclose(fileSeq);
                                     flagSeq = 1;
                                     send(new_socket, message, strlen(message), 0);
                                     if ((recv_size = recv(new_socket, client_reply, 2000, 0)) == -1) {
                                         puts("recv failed");
-                                    }else{
-                                        memset(client_reply,0,sizeof(client_reply));
+                                    } else {
+                                        memset(client_reply, 0, sizeof(client_reply));
                                     }
-                                }else{
-                                    message = "El archivo no existe. (1)";
+                                } else {
+                                    message = "El archivo no existe. (1)\nPresione 1 para continuar ";
                                     send(new_socket, message, strlen(message), 0);
                                     if ((recv_size = recv(new_socket, client_reply, 2000, 0)) == -1) {
                                         puts("recv failed");
                                     }
                                 }
-                            }else{
+                            } else {
                                 //Si ya hay un archivo guardado
-                                message = "Ya tienes un archivo de sequencia guardado. (1)";
+                                message = "Ya tienes un archivo de sequencia guardado. (1)\nPresione 1 para continuar ";
                                 send(new_socket, message, strlen(message), 0);
                                 if ((recv_size = recv(new_socket, client_reply, 2000, 0)) == -1) {
                                     puts("recv failed");
                                 }
                             }
 
-
                             break;
 
                             // (3) Ejecutar
                         case 3:
                             if (flagSeq == 1 && flagRef == 1) {
-                                memset(client_reply,0,sizeof(client_reply));
-                                message = "Seguro que quieres ejecutar el programa (0 o 1)?";
+                                memset(client_reply, 0, sizeof(client_reply));
+                                message = "Seguro que quieres ejecutar el programa? Si: 1, No: 0";
                                 send(new_socket, message, strlen(message), 0);
                                 if ((recv_size = recv(new_socket, client_reply, 2000, 0)) == -1) {
                                     puts("recv failed");
-                                }else{
-                                    if (atoi(client_reply) == 1)
-                                    {
+                                } else {
+                                    if (atoi(client_reply) == 1) {
                                         posicion posicion_dummy = {-1, -1};
                                         /*posicion_dummy es porque vamos a guardar las secuencias de la posición 1 a la 1000, ya que
                                          son 1000 secuencias*/
@@ -461,41 +452,46 @@ int main()
                                         for (int i = 0; i < NTHREADS; i++) {
                                             rc = pthread_join(threads[i], NULL);
                                         }
+                                        free(referencia);
                                         /* TERMINA PARTE DE THREADS */
                                         char response[220000] = "";
                                         char temp[50] = "";
 
                                         for (int i = 1; i < 1001; i++) {
-                                            strcat(response, "Sec ");
-                                            sprintf(temp,"%d",i);
+                                            strcat(response, "Secuencia #");
+                                            sprintf(temp, "%d", i);
                                             strcat(response, temp);
-                                            memset(temp,0,sizeof(temp));
-                                            strcat(response, ": Posicion inicial: ");
-                                            sprintf(temp,"%d",posicion_secuencias[i].pos_ini);
-                                            strcat(response, temp);
-                                            memset(temp,0,sizeof(temp));
-                                            strcat(response, ", ");
-                                            strcat(response, "Posición final: ");
-                                            sprintf(temp,"%d",posicion_secuencias[i].pos_fin);
-                                            strcat(response, temp);
-                                            memset(temp,0,sizeof(temp));
-                                            strcat(response, "\n");
-                                            // printf("Sec %d: Posición inicial: %d, Posición final: %d\n", i, posicion_secuencias[i].pos_ini, posicion_secuencias[i].pos_fin);
+                                            memset(temp, 0, sizeof(temp));
+                                            if (posicion_secuencias[i].pos_ini == -1) {
+                                                strcat(response, " No se encontro en la referencia\n");
+                                            } else {
+                                                strcat(response, ": Posicion inicial: ");
+                                                sprintf(temp, "%d", posicion_secuencias[i].pos_ini);
+                                                strcat(response, temp);
+                                                memset(temp, 0, sizeof(temp));
+                                                strcat(response, ", ");
+                                                strcat(response, "Posición final: ");
+                                                sprintf(temp, "%d", posicion_secuencias[i].pos_fin);
+                                                strcat(response, temp);
+                                                memset(temp, 0, sizeof(temp));
+                                                strcat(response, "\n");
+                                                // printf("Sec %d: Posición inicial: %d, Posición final: %d\n", i, posicion_secuencias[i].pos_ini, posicion_secuencias[i].pos_fin);
+                                            }
                                         }
                                         float porcentaje = calcular_porcentaje();
                                         strcat(response, "\n");
                                         strcat(response, "El porcentaje de igualdad ante la cadena de referencia es del: ");
-                                        sprintf(temp,"%.5f",porcentaje);
+                                        sprintf(temp, "%.5f", porcentaje);
                                         strcat(response, temp);
-                                        memset(temp,0,sizeof(temp));
+                                        memset(temp, 0, sizeof(temp));
                                         strcat(response, "\n");
-                                        sprintf(temp,"%d",num_secuencias_mapeadas);
+                                        sprintf(temp, "%d", num_secuencias_mapeadas);
                                         strcat(response, temp);
-                                        memset(temp,0,sizeof(temp));
+                                        memset(temp, 0, sizeof(temp));
                                         strcat(response, " secuencias mapeadas \n");
-                                        sprintf(temp,"%d",num_secuencias_no_mapeadas);
+                                        sprintf(temp, "%d", num_secuencias_no_mapeadas);
                                         strcat(response, temp);
-                                        memset(temp,0,sizeof(temp));
+                                        memset(temp, 0, sizeof(temp));
                                         strcat(response, " secuencias no mapeadas \n");
                                         send(new_socket, response, strlen(response), 0);
                                         return EXIT_SUCCESS;
@@ -503,22 +499,22 @@ int main()
                                         //printf("\n%d secuencias mapeadas\n%d secuencias no mapeadas\n", num_secuencias_mapeadas, num_secuencias_no_mapeadas);
                                     }
                                 }
-                            }else{
+                            } else {
                                 if (flagRef == 0 && flagSeq == 0) {
-                                    message = "No ha ingresado ningun archivo. (1)";
+                                    message = "No ha ingresado ningun archivo. (1)\nPresione 1 para continuar ";
                                     send(new_socket, message, strlen(message), 0);
                                     if ((recv_size = recv(new_socket, client_reply, 2000, 0)) == -1) {
                                         puts("recv failed");
                                     }
-                                }else if(flagRef == 0 && flagSeq ==1){
-                                    message = "No ha ingresado el archivo de referencia. (1)";
+                                } else if (flagRef == 0 && flagSeq == 1) {
+                                    message = "No ha ingresado el archivo de referencia. (1)\nPresione 1 para continuar ";
                                     send(new_socket, message, strlen(message), 0);
                                     if ((recv_size = recv(new_socket, client_reply, 2000, 0)) == -1) {
                                         puts("recv failed");
                                     }
 
-                                }else if (flagRef == 1 && flagSeq ==0){
-                                    message = "No ha ingresado el archivo de sequencia. (1)";
+                                } else if (flagRef == 1 && flagSeq == 0) {
+                                    message = "No ha ingresado el archivo de sequencia. (1)\nPresione 1 para continuar ";
                                     send(new_socket, message, strlen(message), 0);
                                     if ((recv_size = recv(new_socket, client_reply, 2000, 0)) == -1) {
                                         puts("recv failed");
@@ -530,26 +526,24 @@ int main()
                             break;
                     }
 
-                } while (iOpc !=0);
-                if(iOpc == 0){
+                } while (iOpc != 0);
+                if (iOpc == 0) {
                     message = "Bye";
                     send(new_socket, message, strlen(message), 0);
                     return 1;
                 }
             }
-            if (new_socket == -1)
-            {
+            if (new_socket == -1) {
                 printf("accept failed \n");
                 return 1;
             }
 
-
-            syslog (LOG_NOTICE, "First daemon running.");
+            syslog(LOG_NOTICE, "First daemon running.");
             fflush(fp);
         }
     }
     fclose(fp);
-    syslog (LOG_NOTICE, "First daemon terminated.");
+    syslog(LOG_NOTICE, "First daemon terminated.");
     closelog();
 
     return EXIT_SUCCESS;
