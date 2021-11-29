@@ -195,7 +195,9 @@ void ordena_estructura_bsort() {
 }
 
 //funcion que calcula el porcentaje de la similitud entre las cadenas y la referencia
+
 float calcular_porcentaje() {
+    /*Primero, se ordena la secuencia*/
     ordena_estructura_bsort();
 
     int tama = 1001;
@@ -208,6 +210,7 @@ float calcular_porcentaje() {
         }
     }
 
+    // Se calcula la diferencia de las posiciones para calcular el porcentaje
     for (int j = tama - 1; j >= 1 && posicion_secuencias[j].pos_fin != -1; j--) {
         acumulado_caracteres = acumulado_caracteres + (posicion_secuencias[j].pos_fin - posicion_secuencias[j].pos_ini);
     }
