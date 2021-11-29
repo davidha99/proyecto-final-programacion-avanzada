@@ -51,8 +51,7 @@ static void daemonize() {
     /* Change the working directory to the root directory */
     /* or another appropriated directory */
     // chdir("/Users/jorgemiguelsotorodriguez/progrAva");
-    chdir("/Users/davidhdz/Documents/repos/proyecto-final-programacion-avanzada");
-
+    chdir("/Users/jorgemiguelsotorodriguez/Documents/ITC Carrera/6 Semestre/Programacion Avanzada/Proyectos/proyecto-final-programacion-avanzada");
     /* Close all open file descriptors */
     int x;
     for (x = sysconf(_SC_OPEN_MAX); x >= 0; x--) {
@@ -146,7 +145,7 @@ void *algoritmo_substring(void *x) {
                 }
                 if (j == secuencia_len) {
                     pos.pos_ini = i + 1;
-                    pos.pos_fin = k + 1;
+                    pos.pos_fin = k + 2;
                     posicion_secuencias[pos_next_secuencia] = pos;
                     encontrado = 1;
                     num_secuencias_mapeadas++;
@@ -213,7 +212,7 @@ float calcular_porcentaje() {
         acumulado_caracteres = acumulado_caracteres + (posicion_secuencias[j].pos_fin - posicion_secuencias[j].pos_ini);
     }
 
-    return ((acumulado_caracteres * 100) / lsize_referencia);
+    return ((acumulado_caracteres * 100.0) / lsize_referencia);
 }
 
 int main() {
